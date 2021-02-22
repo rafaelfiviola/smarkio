@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS Comment (
+    id MEDIUMINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    comment_text varchar(40)
+)
