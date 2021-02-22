@@ -1,12 +1,14 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Get, Render } from '@nestjs/common';
+import { CommentsService } from './comments/comments.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
-
+  constructor(private commentsService: CommentsService) {}
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Render('index')
+  async root() {
+    return {
+      comments: await (await this.commentsService.findAll({})).reverse(),
+    };
   }
 }
