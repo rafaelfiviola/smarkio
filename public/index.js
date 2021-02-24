@@ -40,7 +40,7 @@ var retrieveAudio = (text) => {
     'Authorization',
     'Basic ' + btoa(`apikey:8xR06CPrK5zB1ejIrfB1RgcA5SbmQJCMF3Xx8wmJTUxB`),
   );
-  xhr.responseType = 'arraybuffer';
+  xhr.responseType = 'blob';
   xhr.onload = (evt) => {
     var blob = new Blob([xhr.response], { type: 'audio/mpeg' });
     var objectUrl = URL.createObjectURL(blob);
