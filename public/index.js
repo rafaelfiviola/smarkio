@@ -1,11 +1,7 @@
-// $('#register-btn').click(() => {
 $(document).ready(() => {
-  // var audioElement = document.createElement('audio');
   $('#register-btn').click(buttonListener);
   $('.listen-register').click(listenButtonListener);
 });
-// });
-
 var buttonListener = () => {
   $.post(
     'http://localhost:3000/comments',
@@ -15,7 +11,13 @@ var buttonListener = () => {
 };
 
 var appendData = (comment) => {
-  $('#list').prepend(`<div class="list-element">${comment.comment_text}</div>`);
+  $('#list').prepend(`
+    <div class="list-element" id="list-element-{{this.id}}">
+    ${comment.comment_text}
+    <div class="btn btn-primary" id="register-btn-{{this.id}}"
+    onclick="listenButtonListener('${comment.comment_text}')">Ouvir
+    </div>
+    </div>`);
 };
 
 var listenButtonListener = (text) => {
@@ -23,32 +25,31 @@ var listenButtonListener = (text) => {
 };
 
 var retrieveAudio = (text) => {
-  $.ajax({
-    type: 'POST',
-    asynchronous: true,
-    contentType: 'application/json',
-    data: JSON.stringify({ text: `${text}` }),
-    accepts: { audio: 'audio/mpeg' },
-    url: `https://api.us-south.text-to-speech.watson.cloud.ibm.com/instances/764fc03f-d8f1-4f1e-9d68-512e91bbf83d/v1/synthesize`,
-    beforeSend: (xhr) => {
-      xhr.setRequestHeader(
-        'Authorization',
-        'Basic ' + btoa(`apikey:8xR06CPrK5zB1ejIrfB1RgcA5SbmQJCMF3Xx8wmJTUxB`),
-      );
-    },
-    success: (data) => {},
-  }).done((data) => {
-    console.log('yo!');
-    var blob = new Blob([data], { type: 'audio/ogg' });
-    var blobUrl = URL.createObjectURL(blob);
-
-    $('#source').attr('src', blobUrl);
-    $('audio').get(0).load();
-    $('audio')
-      .get(0)
-      .play()
-      .then((_) => {})
-      .catch(console.log);
-    console.log('done!');
-  });
+  var audio = document.createElement('audio');
+  var xhr = new XMLHttpRequest();
+  xhr.open(
+    'POST',
+    encodeURI(
+      `https://api.us-south.text-to-speech.watson.cloud.ibm.com/instances/764fc03f-d8f1-4f1e-9d68-512e91bbf83d/v1/synthesize`,
+    ),
+    true,
+  );
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('Accept', 'audio/mpeg');
+  xhr.setRequestHeader(
+    'Authorization',
+    'Basic ' + btoa(`apikey:8xR06CPrK5zB1ejIrfB1RgcA5SbmQJCMF3Xx8wmJTUxB`),
+  );
+  xhr.responseType = 'arraybuffer';
+  xhr.onload = (evt) => {
+    var blob = new Blob([xhr.response], { type: 'audio/mpeg' });
+    var objectUrl = URL.createObjectURL(blob);
+    audio.src = objectUrl;
+    audio.onload = (evt) => {
+      URL.revokeObjectURL(objectUrl);
+    };
+    audio.play().then();
+  };
+  var data = JSON.stringify({ text });
+  xhr.send(data);
 };
